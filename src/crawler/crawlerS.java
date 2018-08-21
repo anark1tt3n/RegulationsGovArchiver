@@ -53,7 +53,7 @@ public class crawlerS {
 	public static void crawl(String url, WebDriver crawler) throws InterruptedException, IOException {
 		crawler.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS); //make it wait for the page to hopefully load
 		main.print("Starting search for document pages on this page");
-		if(url.toLowerCase().contains("docket")) {
+		if(url.toLowerCase().contains("docket") && url.toLowerCase().contains("regulations.gov")) {
 		if(!url.toLowerCase().contains("browser")) { //makes sure we're going to the docket *browser*
 			String urlSplit[] = url.split("="); //and showing all documents outside comments
 			url = "https://www.regulations.gov/docketBrowser?rpp=50&so=ASC&sb=commentDueDate&po=50&dct=O%2BSR%2BFR%2BPR%2BN&D=" + urlSplit[urlSplit.length-1];
@@ -66,8 +66,8 @@ public class crawlerS {
 		}
 		} else {
 			crawler.quit();
-			main.print("Was not linked to a docket. URL given was: " + url);
-			JOptionPane.showMessageDialog(null, "Make sure you are linking to the docket", "Error", JOptionPane.ERROR_MESSAGE);
+			main.print("Was not linked to regulations.gov. URL given was: " + url);
+			JOptionPane.showMessageDialog(null, "Make sure you are linking to regulations.gov!", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		while(nPage) {
@@ -94,7 +94,7 @@ public class crawlerS {
 		down.loadAll(attLinks,attTitles,docExt,docTitles);
 		main.print("Should've downloaded all attachments listed.");
 		crawler.quit();
-		JOptionPane.showMessageDialog(draw.urlF, "We should've downloaded all attachments in the Docket Browser for this document!", "Done", JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(draw.urlF, "We should've downloaded all attachments for this document!", "Done", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	public static void nextPage(WebDriver crawler) {

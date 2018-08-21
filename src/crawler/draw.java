@@ -26,8 +26,9 @@ public class draw extends JPanel implements ActionListener {
 
 	String userU;
 	JButton go = new JButton("Start"); 
+	JButton abort = new JButton("Abort");
 	static JTextField urlF = new JTextField(20);
-	static JProgressBar progressBar = new JProgressBar(0, 100);
+//	static JProgressBar progressBar = new JProgressBar(0, 100);
 
 	protected void paintComponent(Graphics g) { //lesbian flag gradient background for aesthetic/pride
 		super.paintComponents(g); //we're overwriting the paintComponent basically
@@ -48,31 +49,11 @@ public class draw extends JPanel implements ActionListener {
 		g2d.fillRect(0, 0, w, h);
 	}
 
-	public void updateBar() {
-
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		userU = urlF.getText();
 		main.print(userU);
 		try {
-//			new Thread(new Runnable(){
-//				public void run(){
-//					int x = 0;
-//					while(x<=100) {
-//						x = crawlerS.progress;
-//						progressBar.setValue(x);        // Setting incremental values
-//						if (x == 100 ){
-//							progressBar.setString("Done with the download!");   // End message
-//							try{
-//								Thread.sleep(200);
-//							}catch(Exception ex){
-//							}
-//						}
-//					}
-//				}
-//			}).start();
 			crawlerS.initC(userU); //passes the url to the crawlerS class so it can start searching
 		} catch (InterruptedException malf) {
 			main.print("Malformed URL");
@@ -101,13 +82,15 @@ public class draw extends JPanel implements ActionListener {
 			}
 		});
 		urlF.setText("Place document URL here");
+		
+		abort.addActionListener(e -> System.exit(0)); //if you click abort... program close
 
 //		progressBar.setValue(0);
 //		progressBar.setStringPainted(true);
 
 		add(urlF, BorderLayout.CENTER);
-		add(go, BorderLayout.SOUTH);
-//		add(progressBar,BorderLayout.NORTH);
+//		add(abort,BorderLayout.SOUTH);
+		add(go, BorderLayout.NORTH);
 
 		JFrame test = new JFrame();
 
