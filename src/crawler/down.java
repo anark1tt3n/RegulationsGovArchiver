@@ -15,48 +15,39 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class down{
+								//attachment links | attachment titles | extension of attachments | the folder they go in
+	public static void loadAll(ArrayList<String> links, ArrayList<String> titles, ArrayList<String> ext, ArrayList<String> folds) { 
+		int i = 0;
+        new File("Attachments").mkdir(); //make the attachments folder
+        for(String url : links) {    
+            if(!(url == null)) {
+            		main.print("Referencing index " + i + " out of " + links.size());
+                    load(url, titles.get(i), ext.get(i), folds.get(i));
+            }
+            i++;
+        }
+    }
 
-	public static void loadAll(ArrayList<String> links, ArrayList<String> titles, ArrayList<String> ext, ArrayList<String> groups, ArrayList<String> folds) {
-		String folder = groups.toString().replaceAll("[\\[\\]\\s]", ""); //what folder are we on?
-		int[] groupNumb = Arrays.stream(folder.split(",")).mapToInt(Integer::parseInt).toArray(); //grouping of attachments as ints
-		int document = 0; //what document in that directory are we on?
-		int groupCount = 0; //what docs-per-folder are we comparing this number to?
-		int count = 0; //what number are we in terms of docs-per-folder?
-		for(String url : links) {
-			if(!url.equals("No Att")) {
-				if(count < groupNumb[document]) { //if there's still more files to fit in this folder
-					try {
-						load(url, titles.get(count), ext.get(count), folds.get(groupNumb[groupCount])); //try to download the file
-						count++;
-					} catch (IOException e) {
-						main.print("failed to DL attachment, continuing...");
-						count++;
-						e.printStackTrace();
-					}
-				}
-			}
-			else {
-				document++;
-			}
-			if(count==groupNumb.length-1) {
-				groupCount++;	
-			}
-		}
-	}
-	
 	public static void delete(File file) {
 		file.delete();
 	}
 
-	public static void load(String link, String title, String ext, String fold) throws IOException { //goes through list of pdfs, downloads
+	public static void load(String link, String title, String ext, String fold) { //goes through list of pdfs, downloads
 		main.print("Downloading file titled " + title);
-		String T = title.replaceAll("[\\\\/:*?\"<>|]", "_") + "." + ext; //we're sanitizing the title
-		new File("Attachments" + fold).mkdirs(); //making a folder for it
-		URL website = new URL(link); //makes a URL from the first string passed
-		ReadableByteChannel rbc = Channels.newChannel(website.openStream()); //opens the given url as a stream of bytes
-		FileOutputStream fos = new FileOutputStream(new File("Attachments/" + fold + "/" + T)); //create new fileoutput stream, file name as the stored PDF title"
-		fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE); //writes the above bytes to the file output stream
-		fos.close(); //closes file output stream
+		try {
+			String T = title.replaceAll("[\\\\/:*?\"<>|]", "_"); //we're sanitizing the title
+			new File("Attachments/" + fold).mkdirs();
+			File attachment = File.createTempFile("Attachments/" + fold + "/" + T, ext); 
+			URL website = new URL(link); //makes a URL from the first string passed
+			ReadableByteChannel rbc = Channels.newChannel(website.openStream()); //opens the given url as a stream of bytes
+			FileOutputStream fos = new FileOutputStream(attachment); //create new fileoutput stream, file name as the stored PDF title"
+			main.print(new File("Attachments/" + fold + "/" + T).getAbsolutePath());
+			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE); //writes the above bytes to the file output stream
+			fos.close(); //closes file output stream
+		} catch (IOException e) {
+			main.print("failed to DL attachment, continuing...");
+            e.printStackTrace();
+		}
 	}
 
 	public static void unzip(String a) throws IOException { //utility for unzipping
@@ -86,6 +77,7 @@ public class down{
 				while ((length = is.read(bytes)) >= 0) {
 					fos.write(bytes, 0, length);
 				}
+				
 				is.close();
 				fos.close();
 

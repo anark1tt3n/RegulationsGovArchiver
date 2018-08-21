@@ -24,9 +24,8 @@ public class crawlerS {
 	static ArrayList<String> docExt = new ArrayList<String>(); //where we'll be placing the file extension of the documents
 	static ArrayList<String> docs = new ArrayList<String>(); //the <a> links that are actually documents
 	static ArrayList<String> docTitles = new ArrayList<String>(); //used for folder names
-	static ArrayList<String> docGroups = new ArrayList<String>(); //used folder grouping later
-	static String posExt[] = {"pdf" , "msw12", "excel12book" };//possible attachment extensions
-	static String realExt[] = {"pdf" , "docx" , "xlsx"};
+	static String posExt[] = {"pdf" , "msw12" , "excel12book" , "crtext"};//possible attachment extensions
+	static String realExt[] = {"pdf" , "docx" , "xlsx" , "txt"};
 	static boolean nPage = true; //bool to verify if there is a next page
 	static ChromeOptions options = new ChromeOptions();
 	static String[] urlSplit; //where we place the document id
@@ -92,14 +91,7 @@ public class crawlerS {
 		main.print(docs);
 		main.print("Now we start looking for the attachments");
 		compileList(crawler, docs);
-		down.loadAll(attLinks,attTitles,docExt,docGroups,docTitles);
-		/*		int a=0;
-		for(String b : docLinks) { //for each doc in the documents string...
-			int downProg = 100-progress;
-			progress = progress+((downProg)*(a/docLinks.size()));
-			down.load(b, docTitles.get(a), docExt.get(a), docGroups.get(a));
-			a++;
-		}*/
+		down.loadAll(attLinks,attTitles,docExt,docTitles);
 		main.print("Should've downloaded all attachments listed.");
 		crawler.quit();
 		JOptionPane.showMessageDialog(draw.urlF, "We should've downloaded all attachments in the Docket Browser for this document!", "Done", JOptionPane.INFORMATION_MESSAGE);
@@ -138,8 +130,8 @@ public class crawlerS {
 		nextPage(crawler);
 	}
 
-	public static void percentArch(int a,int b) {
-		progress = (a/b)*80;
+	public static int percentArch(int a,int b) {
+		return (a/b)*80;
 	}
 
 	public static void compileList(WebDriver crawler, ArrayList<String> docs) {
@@ -154,28 +146,24 @@ public class crawlerS {
 				for(String ext : posExt) { //looking for files of every extension type
 					List<WebElement> loadAtt = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy((By.cssSelector("a[href*='=" + ext + "']")))); //waiting for column to show
 					main.print("We've found files with the extension of: " + realExt[i]);
-					int attPer = 0; //attachments on this page for folder grouping later
 					for(WebElement att : loadAtt) {
 						try {
 							main.print("Found the attachment, adding to link collection");
-							attLinks.add(att.getAttribute("href"));
-							WebElement rTitle = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("/html/body/div[3]/div[2]/div[2]/div[2]/div/div/div[1]/div[1]/h1")))); 
-							try {
+							attLinks.add(att.getAttribute("href")); //adding download link
+							WebElement rTitle = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("/html/body/div[3]/div[2]/div[2]/div[2]/div/div/div[1]/div[1]/h1"))));
+							docTitles.add(rTitle.getText()); //
+							try { //titles are nested weirdly so we're ripping em
 								WebElement parentElement = att.findElement(By.xpath("./..")); //getting to grandparentto try to
 								WebElement grandElement = parentElement.findElement((By.xpath("./.."))); //find the parent to find the title
 								WebElement title = grandElement.findElement(By.xpath("//h3")); //if its an attachment listed an alt way
 								rTitle = title;
-								attPer++; //haha lets hope this works
 							} catch(NoSuchElementException e) {
 								main.print("Defaulting to document title for file name...");
-								attPer++; //we just don't change the title now lmao
 							}
 							attTitles.add(rTitle.getText()); //adding the text of the above element to our list of document titles
 							docExt.add(realExt[i]); //adding the extension, filtered because this website is weird with extensions
-							percentArch(i,docs.size()); 
-							docGroups.add(Integer.toString(attPer));
-							attPer=0;
-							main.print("We are " + progress + "% percent done with checking these links :)");
+//							progress = percentArch(i,docs.size()); 
+//							main.print("We are " + progress + "% percent done with checking these links :)");
 						} catch(InvalidSelectorException e) {
 							main.print("Couldn't find a document with an extension of \"" + ext + "\" on this page. \n Continuing...");
 						}
@@ -184,7 +172,11 @@ public class crawlerS {
 				}
 			} catch (TimeoutException e) {
 				main.print("Couldnt find document with current extension, continuing.");
-				attLinks.add("No Att");
+				attLinks.add(null);
+				docExt.add(null);
+				attTitles.add(null);
+				docTitles.add(null);
+				
 			}
 		}
 	}

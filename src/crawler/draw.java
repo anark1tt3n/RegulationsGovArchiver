@@ -25,7 +25,7 @@ import javax.swing.SwingWorker;
 public class draw extends JPanel implements ActionListener {
 
 	String userU;
-	JButton go = new JButton("Get PDFs"); 
+	JButton go = new JButton("Start"); 
 	static JTextField urlF = new JTextField(20);
 	static JProgressBar progressBar = new JProgressBar(0, 100);
 
@@ -57,22 +57,22 @@ public class draw extends JPanel implements ActionListener {
 		userU = urlF.getText();
 		main.print(userU);
 		try {
-			new Thread(new Runnable(){
-				public void run(){
-					int x = 0;
-					while(x<=100) {
-						x = crawlerS.progress;
-						progressBar.setValue(x);        // Setting incremental values
-						if (x == 100 ){
-							progressBar.setString("Done with the download!");   // End message
-							try{
-								Thread.sleep(200);
-							}catch(Exception ex){
-							}
-						}
-					}
-				}
-			}).start();
+//			new Thread(new Runnable(){
+//				public void run(){
+//					int x = 0;
+//					while(x<=100) {
+//						x = crawlerS.progress;
+//						progressBar.setValue(x);        // Setting incremental values
+//						if (x == 100 ){
+//							progressBar.setString("Done with the download!");   // End message
+//							try{
+//								Thread.sleep(200);
+//							}catch(Exception ex){
+//							}
+//						}
+//					}
+//				}
+//			}).start();
 			crawlerS.initC(userU); //passes the url to the crawlerS class so it can start searching
 		} catch (InterruptedException malf) {
 			main.print("Malformed URL");
@@ -102,12 +102,12 @@ public class draw extends JPanel implements ActionListener {
 		});
 		urlF.setText("Place document URL here");
 
-		progressBar.setValue(0);
-		progressBar.setStringPainted(true);
+//		progressBar.setValue(0);
+//		progressBar.setStringPainted(true);
 
 		add(urlF, BorderLayout.CENTER);
 		add(go, BorderLayout.SOUTH);
-		add(progressBar,BorderLayout.NORTH);
+//		add(progressBar,BorderLayout.NORTH);
 
 		JFrame test = new JFrame();
 
